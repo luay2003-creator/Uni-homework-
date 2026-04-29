@@ -1,55 +1,47 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFFER_SIZE 20
+#define BUFFER_SIZE 10
 
 typedef struct {
     char arr[BUFFER_SIZE];
-    int head;   // موقع القراءة
-    int tail;   // موقع الكتابة
-    int count;  // عدد العناصر الحالية
+    int head;
+    int tail;
+    int count;
 } CircularBuffer;
 
-// تهيئة المخزن
 void initBuffer(CircularBuffer *cb) {
     cb->head = 0;
     cb->tail = 0;
     cb->count = 0;
 }
 
-// التحقق إذا ممتلئ
 int isFull(CircularBuffer *cb) {
     return cb->count == BUFFER_SIZE;
 }
 
-// التحقق إذا فارغ
 int isEmpty(CircularBuffer *cb) {
     return cb->count == 0;
 }
 
-// إضافة عنصر
 void enqueue(CircularBuffer *cb, char value) {
     if (isFull(cb)) {
-        printf("\n[Error] Buffer Overflow while inserting '%c'\n", value);
+        printf("[Overflow] Cannot insert '%c'\n", value);
         return;
     }
-
     cb->arr[cb->tail] = value;
     cb->tail = (cb->tail + 1) % BUFFER_SIZE;
     cb->count++;
 }
 
-// حذف عنصر
 char dequeue(CircularBuffer *cb) {
     if (isEmpty(cb)) {
-        printf("\n[Error] Buffer Underflow\n");
+        printf("[Underflow] Buffer is empty\n");
         return '\0';
     }
-
     char value = cb->arr[cb->head];
     cb->head = (cb->head + 1) % BUFFER_SIZE;
     cb->count--;
-
     return value;
 }
 
@@ -62,24 +54,35 @@ int main() {
     printf("Enter your name: ");
     scanf("%s", name);
 
-    // إضافة اللاحقة المطلوبة (بدون شرطة)
     strcat(name, "CE-ESY");
 
-    printf("\nFinal string: %s\n", name);
+    printf("\n--- Normal Case ---\n");
+    printf("Input string: %s\n", name);
 
-    // إدخال الأحرف إلى المخزن
+    // إدخال البيانات
     for (int i = 0; i < strlen(name); i++) {
         enqueue(&cb, name[i]);
     }
 
-    // إخراج الأحرف من المخزن
-    printf("\nOutput: ");
+    // إخراج البيانات
+    printf("Output: ");
     while (!isEmpty(&cb)) {
-        char ch = dequeue(&cb);
-        printf("%c", ch);
+        printf("%c", dequeue(&cb));
     }
 
     printf("\n");
+
+    // 🔥 اختبار Underflow
+    printf("\n--- Underflow Test ---\n");
+    dequeue(&cb); // المفروض يعطي خطأ
+
+    // 🔥 اختبار Overflow
+    printf("\n--- Overflow Test ---\n");
+    for (int i = 0; i < BUFFER_SIZE + 3; i++) {
+        enqueue(&cb, 'A' + i); // رح يتجاوز الحجم
+    }
+
+    printf("\nDone.\n");
 
     return 0;
 }
